@@ -16,8 +16,6 @@ namespace SkillzSDK.Internal.API.UnityEditor
 
 		private const float DefaultVolume = 0.5f;
 
-		private bool matchInProgress;
-
 		public IRandom Random
 		{
 			get
@@ -30,7 +28,7 @@ namespace SkillzSDK.Internal.API.UnityEditor
 		{
 			get
 			{
-				return matchInProgress;
+				throw new NotSupportedException(SyncMatchesNotSupported);
 			}
 		}
 
@@ -57,14 +55,6 @@ namespace SkillzSDK.Internal.API.UnityEditor
 			{
 				soundEffectsVolume = value > 1f ? 1f : value;
 				soundEffectsVolume = soundEffectsVolume < 0f ? 0f : soundEffectsVolume;
-			}
-		}
-
-		IRandom ISyncAPI.Random
-		{
-			get
-			{
-				throw new NotSupportedException(SyncMatchesNotSupported);
 			}
 		}
 
@@ -108,30 +98,16 @@ namespace SkillzSDK.Internal.API.UnityEditor
 
 		public Hashtable GetMatchRules()
 		{
-			if (!matchInProgress)
-			{
-				return new Hashtable();
-			}
-
 			return new Hashtable(matchInfo.GameParams);
 		}
 
 		public Match GetMatchInfo()
 		{
-			if (!matchInProgress)
-			{
-				// This behavior is not consistent across platforms. iOS will return null,
-				// while Android will throw an NRE because it assumes there is a match to
-				// get match info from.
-				throw new InvalidOperationException("No simulated match in progress");
-			}
-
 			return matchInfo;
 		}
 
 		public void AbortMatch()
 		{
-			FinishSimulatedMatch();
 			SDKScenesLoader.Load(SDKScenesLoader.MatchAbortedScene);
 		}
 
@@ -152,8 +128,6 @@ namespace SkillzSDK.Internal.API.UnityEditor
 
 		public void ReportFinalScore(string score)
 		{
-			FinishSimulatedMatch();
-
 			if (SkillzSettings.Instance.SimulateMatchWins)
 			{
 				SDKScenesLoader.Load(SDKScenesLoader.MatchWonScene);
@@ -188,23 +162,10 @@ namespace SkillzSDK.Internal.API.UnityEditor
 
 		public void AddMetadataForMatchInProgress(string metadataJson, bool forMatchInProgress)
 		{
-			// Do nothing. It appears this is an old API that doesn't have a corresponding getter.
 		}
 
 		public void SetSkillzBackgroundMusic(string fileName)
 		{
-		}
-
-		internal void InitializeSimulatedMatch(string matchInfoJson)
-		{
-			matchInProgress = true;
-			matchInfo = new Match((Dictionary<string, object>)Json.Deserialize(matchInfoJson));
-		}
-
-		private void FinishSimulatedMatch()
-		{
-			matchInProgress = false;
-			matchInfo = null;
 		}
 
 		int ISyncAPI.GetConnectedPlayerCount()

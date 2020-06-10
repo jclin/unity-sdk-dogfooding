@@ -32,9 +32,7 @@ namespace SkillzSDK
 
 			if (timeRemaining < 0f)
 			{
-				var matchInfoJson = MatchInfoJson.Build(SkillzSettings.Instance.GameID);
-				SkillzCrossPlatform.InitializeSimulatedMatch(matchInfoJson);
-				SkillzState.NotifyMatchWillBegin(matchInfoJson);
+				SkillzState.NotifyMatchWillBegin(MatchInfoJson.Build(SkillzSettings.Instance.GameID));
 			}
 		}
 	}

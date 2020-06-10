@@ -319,24 +319,6 @@ public static class SkillzCrossPlatform
 		BridgedAPI.Initialize(gameID, environment, orientation);
 	}
 
-	internal static void InitializeSimulatedMatch(string matchInfoJson)
-	{
-		if (!Application.isEditor)
-		{
-			Debug.LogWarning($"Called SkillzCrossPlatform.InitializeSimulatedMatch() from other than the Unity editor!");
-			return;
-		}
-
-		var editorBridgedApi = BridgedAPI as SkillzSDK.Internal.API.UnityEditor.BridgedAPI;
-		if (editorBridgedApi == null)
-		{
-			Debug.LogWarning($"Expected an SkillzSDK.Internal.API.UnityEditor.BridgedAPI instance for initializing a simulated match!");
-			return;
-		}
-
-		editorBridgedApi.InitializeSimulatedMatch(matchInfoJson);
-	}
-
 	/// <summary>
 	/// This is the Random class that you can use to implement fairness in your game
 	/// Use this Random function for variables that can affect gameplay.

@@ -10,7 +10,7 @@ android {
 	compileSdkVersion 28
 
 	configurations.all {
-		resolutionStrategy.force 'androidx.multidex:multidex:2.0.1'
+		resolutionStrategy.force 'androidx.multidex:multidex:2.0.0'
 	}
 
 	compileOptions {
