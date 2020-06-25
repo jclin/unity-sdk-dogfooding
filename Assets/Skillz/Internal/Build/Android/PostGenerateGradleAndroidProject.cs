@@ -22,22 +22,41 @@ namespace SkillzSDK.Internal.Build.Android
 			}
 		}
 
+		protected string PluginsFolder
+		{
+			get
+			{
+				return Path.Combine(Application.dataPath, "Plugins", "Android");
+			}
+		}
+
+		protected abstract string SourceResourcesFolder
+		{
+			get;
+		}
+
 		protected void ModifyGradleProject(string basePath)
 		{
 			AppendLocallySetSdkVersionToGradleProperties(GetProjectGradlePropertiesPath(basePath));
 			EnableAndroidxInGradleProperties(GetProjectGradlePropertiesPath(basePath));
+			EnableR8InGradleProperties(GetProjectGradlePropertiesPath(basePath));
 			ModifyAndroidManifests(basePath);
 			ModifyGradleFile(GetGradlePath(basePath));
 			ModifyFirebaseManifest(GetFirebaseManifestPath(basePath));
 			ModifyFirebaseGradle(GetFirebaseGradlePath(basePath));
+			CopyProguardRulesPro(GetProguardRulesProPath(basePath));
 			CopyMultidexKeep(GetMultidexKeepPath(basePath));
+			PerformMiscWork(basePath);
 		}
 
 		protected abstract void ModifyAndroidManifests(string basePath);
 		protected abstract string GetMultidexKeepPath(string basePath);
+		protected abstract string GetProguardRulesProPath(string basePath);
 		protected abstract string GetGradlePath(string basePath);
 		protected abstract string GetFirebaseManifestPath(string basePath);
 		protected abstract string GetFirebaseGradlePath(string basePath);
+
+		protected abstract void PerformMiscWork(string basePath);
 
 		private void AppendLocallySetSdkVersionToGradleProperties(string projectGradlePropertiesPath)
 		{
@@ -80,6 +99,22 @@ namespace SkillzSDK.Internal.Build.Android
 			}
 		}
 
+		private void EnableR8InGradleProperties(string projectGradlePropertiesPath)
+		{
+			Debug.Log($"Enabling R8 in '{projectGradlePropertiesPath}'");
+
+			// https://stackoverflow.com/questions/57635963/gradle-dsl-element-useproguard-is-obsolete-and-will-be-removed-soon
+			const string enableR8 = "android.enableR8=true";
+
+			using (var projectGradleProperties = new GradleProperties(projectGradlePropertiesPath))
+			{
+				if (!projectGradleProperties.FileContents.Contains(enableR8))
+				{
+					projectGradleProperties.Append(enableR8);
+				}
+			}
+		}
+
 		private void ModifyGradleFile(string gradlePath)
 		{
 			if (!File.Exists(gradlePath))
@@ -107,6 +142,8 @@ namespace SkillzSDK.Internal.Build.Android
 				ExcludeReactFromImagePicker(buildDotGradle);
 				ExcludeReactFromScrollView(buildDotGradle);
 				ExcludeReactAAR(buildDotGradle);
+
+				PatchFirebaseLocalRepoPath(buildDotGradle);
 			}
 		}
 
@@ -174,6 +211,18 @@ namespace SkillzSDK.Internal.Build.Android
 			buildDotGradle.ExcludeAARDependency("com.facebook.react.react-native-0.59.10");
 		}
 
+		private void PatchFirebaseLocalRepoPath(BuildDotGradle buildDotGradle)
+		{
+			// Works around a bug in v1.2.155 (or earlier) of the Play Resolver where the path for the
+			// local repo for Firebase packages is incorrect. We bundle v1.2.156, which fixes the bug,
+			// but adding this workaround in case a developer unintentionally is using a version
+			// of the Play Resolver that has the bug.
+			//
+			// See: https://github.com/firebase/quickstart-unity/issues/655#issuecomment-647238128
+
+			buildDotGradle.FixFirebaseLocalRepoPath();
+		}
+
 		private bool UseLocallyProvidedSkillzVersion(out string localSkillzVersion)
 		{
 			localSkillzVersion = GetLocallyProvidedSkillzVersion();
@@ -236,11 +285,37 @@ namespace SkillzSDK.Internal.Build.Android
 			}
 		}
 
+		private void CopyProguardRulesPro(string destPath)
+		{
+			// Unity isn't copying the proguard-rules.pro that we emit
+			// to /Assets/Plugins/Android
+			Debug.Log($"Making '{destPath}'");
+
+			var expectedCopy = Path.Combine(PluginsFolder, "proguard-rules.pro");
+			if (File.Exists(expectedCopy))
+			{
+				FileUtil.ReplaceFile(expectedCopy, destPath);
+				return;
+			}
+
+			Debug.LogWarning($"'{expectedCopy}' doesn't exist, using the default copy from '{SourceResourcesFolder}'");
+			FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, "proguard-rules.pro"), destPath);
+		}
+
 		private void CopyMultidexKeep(string destPath)
 		{
 			// Unity isn't copying the multidex-keep.txt that we emit
 			// to /Assets/Plugins/Android/
 			Debug.Log($"Making '{destPath}'");
+
+			var expectedCopy = Path.Combine(PluginsFolder, "multidex-keep.txt");
+			if (File.Exists(expectedCopy))
+			{
+				FileUtil.ReplaceFile(expectedCopy, destPath);
+				return;
+			}
+
+			Debug.LogWarning($"'{expectedCopy}' doesn't exist, using the default copy...");
 			FileUtil.ReplaceFile(Path.Combine(Application.dataPath, "Skillz", "Resources", "multidex-keep.txt"), destPath);
 		}
 

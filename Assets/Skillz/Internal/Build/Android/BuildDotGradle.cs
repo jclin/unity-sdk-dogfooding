@@ -122,6 +122,32 @@ namespace SkillzSDK.Internal.Build.Android
 			ExcludeFileDependency(fullName, AAR);
 		}
 
+		public void FixFirebaseLocalRepoPath()
+		{
+			Debug.Log("Checking if the gradle is referencing a local Firebase repo...");
+
+			const string wrongLocalRepo = "Assets/Firebase/m2repository";
+
+			var index = allLines.FindIndex(0, line => line.Contains(wrongLocalRepo));
+			if (index == -1)
+			{
+				Debug.Log("The project is not referencing a local Firebase repo.");
+				return;
+			}
+
+			// The default folder in the Play Resolver is `Assets/GeneratedLocalRepo`.
+			// Unfortunately, there doesn't seem to be a way to access this setting
+			// programmatically, so assume the dev has kept it at the default value.
+			const string defaultLocalRepo = "GeneratedLocalRepo";
+
+			var theLine = allLines[index];
+			allLines[index] = theLine.Replace(wrongLocalRepo, $"Assets/{defaultLocalRepo}/Firebase/m2repository");
+
+			Debug.Log($"Patched the local Firebase repo to '{allLines[index]}'");
+
+			modified |= true;
+		}
+
 		public void Dispose()
 		{
 			if (!modified)

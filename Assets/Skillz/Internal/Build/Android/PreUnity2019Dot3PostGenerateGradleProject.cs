@@ -14,6 +14,14 @@ namespace SkillzSDK.Internal.Build.Android
 	/// </summary>
 	internal sealed class PreUnity2019Dot3PostGenerateGradleProject : PostGenerateGradleAndroidProject, IPostGenerateGradleAndroidProject
 	{
+		protected override string SourceResourcesFolder
+		{
+			get
+			{
+				return Path.Combine(Application.dataPath, "Skillz", "Resources", "2019.2");
+			}
+		}
+
 		public void OnPostGenerateGradleAndroidProject(string basePath)
 		{
 			ModifyGradleProject(basePath);
@@ -49,6 +57,11 @@ namespace SkillzSDK.Internal.Build.Android
 			manifest.Save();
 		}
 
+		protected override string GetProguardRulesProPath(string basePath)
+		{
+			return Path.Combine(basePath, "proguard-rules.pro");
+		}
+
 		protected override string GetMultidexKeepPath(string basePath)
 		{
 			return Path.Combine(basePath, "multidex-keep.txt");
@@ -67,6 +80,10 @@ namespace SkillzSDK.Internal.Build.Android
 		protected override string GetFirebaseGradlePath(string basePath)
 		{
 			return Path.Combine(basePath, Firebase, BuildDotGradle);
+		}
+
+		protected override void PerformMiscWork(string basePath)
+		{
 		}
 	}
 }

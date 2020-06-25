@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "917805352111",
+    "firebase_url": "https://simple-game-b5db1.firebaseio.com",
+    "project_id": "simple-game-b5db1",
+    "storage_bucket": "simple-game-b5db1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917805352111:android:c4c9acc6ccfe283ecec05a",
+        "android_client_info": {
+          "package_name": "com.skillz.simplegame"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917805352111-locc7rd9mukeumgbnti65kp2r0n6v92d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNSn5Z9Z-IpK9X0YT4qwkFiF5ZSCSZfNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917805352111-locc7rd9mukeumgbnti65kp2r0n6v92d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "917805352111-7n6s9t6k9qmf3h53j54na7f61hf9i6vi.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.skillz.simplegame",
+                "app_store_id": "962194608"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
