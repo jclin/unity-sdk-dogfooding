@@ -91,6 +91,13 @@ public sealed class SkillzSettingsWindow : EditorWindow
 		SkillzSettings.Instance.GameID = EditorGUILayout.IntField("Game ID", SkillzSettings.Instance.GameID);
 		SkillzSettings.Instance.Environment = (Environment)EditorGUILayout.EnumPopup("Skillz Environment", SkillzSettings.Instance.Environment);
 		SkillzSettings.Instance.Orientation = (Orientation)EditorGUILayout.EnumPopup("Skillz Orientation", SkillzSettings.Instance.Orientation);
+		SkillzSettings.Instance.AllowSkillzExit = EditorGUILayout.Toggle(
+			new GUIContent(
+				"Allow Skillz to Exit",
+				"Allows the user to exit the Skillz UI via the sidebar menu."
+			),
+			SkillzSettings.Instance.AllowSkillzExit
+		);
 
 		EditorGUI.indentLevel--;
 	}

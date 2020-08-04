@@ -39,6 +39,10 @@ namespace SkillzSDK.Settings
 		[SerializeField]
 		public bool SimulateMatchWins;
 
+		[HideInInspector]
+		[SerializeField]
+		public bool AllowSkillzExit;
+
 		private static SettingsLoader SettingsLoader
 		{
 			get
@@ -59,6 +63,7 @@ namespace SkillzSDK.Settings
 		private SkillzSettings()
 		{
 			MatchParameters = new StringKeyValue[MaxMatchParameters];
+			AllowSkillzExit = true;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR && UNITY_ANDROID && UNITY_2019_3_OR_NEWER
 using System.Linq;
 using System.IO;
+using UnityEditor;
 using UnityEditor.Android;
 using UnityEngine;
 using SkillzSDK.Settings;
@@ -20,6 +21,14 @@ namespace SkillzSDK.Internal.Build.Android
 		private const string Launcher = "launcher";
 		private const string UnityLibrary = "unityLibrary";
 
+		protected override string SourceResourcesFolder
+		{
+			get
+			{
+				return Path.Combine(Application.dataPath, "Skillz", "Resources", "2019.3");
+			}
+		}
+
 		public void OnPostGenerateGradleAndroidProject(string basePath)
 		{
 			ModifyGradleProject(CoerceBasePath(basePath));
@@ -31,9 +40,19 @@ namespace SkillzSDK.Internal.Build.Android
 			ModifyUnityLibraryManifest(Path.Combine(basePath, UnityLibrary, Src, Main, AndroidManifestDotXml));
 		}
 
+		protected override string GetProguardRulesProPath(string basePath)
+		{
+			return Path.Combine(basePath, Launcher, "proguard-rules.pro");
+		}
+
 		protected override string GetMultidexKeepPath(string basePath)
 		{
 			return Path.Combine(basePath, Launcher, "multidex-keep.txt");
+		}
+
+		protected override void PerformMiscWork(string basePath)
+		{
+			FileUtil.ReplaceFile(Path.Combine(PluginsFolder, "consumer-rules.pro"), Path.Combine(basePath, UnityLibrary, "consumer-rules.pro"));
 		}
 
 		private void ModifyLauncherManifest(string manifestPath)
@@ -64,7 +83,7 @@ namespace SkillzSDK.Internal.Build.Android
 			manifest.SetClearTaskOnLaunch("false");
 			manifest.SetAlwaysRetainTaskState("true");
 
-			manifest.AddMetadataElement("skillz_allow_exit", "false");
+			manifest.AddMetadataElement("skillz_allow_exit", SkillzSettings.Instance.AllowSkillzExit.ToString().ToLowerInvariant());
 			manifest.AddMetadataElement("skillz_game_id", SkillzSettings.Instance.GameID.ToString());
 			manifest.AddMetadataElement("skillz_production", (SkillzSettings.Instance.Environment == Environment.Production).ToString().ToLowerInvariant());
 			manifest.AddMetadataElement("skillz_game_activity", skillzActivityName);

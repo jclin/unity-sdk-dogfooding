@@ -1,13 +1,17 @@
 #if UNITY_EDITOR && UNITY_IOS
 using UnityEngine;
 using ActualUnityEditor = UnityEditor;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SkillzSDK.Internal.Build.iOS
 {
 	using ActualUnityEditor.SKZXCodeEditor;
+	using SkillzSDK.Settings;
+
 	//Disable warnings about code blocks that will never be reached.
-	#pragma warning disable 162, 429
+#pragma warning disable 162, 429
 
 	public static class SkillzPostProcessBuild
 	{
@@ -28,7 +32,6 @@ namespace SkillzSDK.Internal.Build.iOS
 		/// Only used if "AutoBuild_Use" is true.
 		/// </summary>
 		private const string AutoBuild_SkillzPath = "/Users/myUsername/Downloads/sdk_ios_10.1.19/Skillz.framework";
-
 
 		/// <summary>
 		/// A file with this name is used to track whether a build is appending or replacing.
@@ -106,12 +109,31 @@ namespace SkillzSDK.Internal.Build.iOS
 				//Unity_4 doesn't exist so we check for Unity 5 defines.  Unity 6 is used for futureproofing.
 #if !UNITY_5 && !UNITY_6
 				project.AddFile(Path.Combine(Application.dataPath, "Skillz", "Internal", "Build", "iOS", "IncludeInXcode", "Skillz+Unity.mm"));
+				SetAllowSkillzExit(Path.Combine(path, "Libraries", "Skillz", "Internal", "Build", "iOS", "IncludeInXcode", "Skillz+Unity.mm"));
 #endif
 				project.Save ();
 			} else {
 				UnityEngine.Debug.LogError("Skillz automated XCode export failed!");
 				return;
 			}
+		}
+
+		private static void SetAllowSkillzExit(string skillzPlusUnityPath)
+		{
+			Debug.Log($"[Skillz] Setting allowExit at '{skillzPlusUnityPath}'");
+
+			var allLines = File.ReadAllLines(skillzPlusUnityPath).ToList();
+			var index = allLines.FindIndex(0, line => line.Contains("allowExit:YES"));
+			if (index == -1)
+			{
+				Debug.LogWarning($"[Skillz] Could not find 'allowExit:YES'!");
+				return;
+			}
+
+			var allowExit = SkillzSettings.Instance.AllowSkillzExit ? "YES" : "NO";
+			allLines[index] = allLines[index].Replace("allowExit:YES", $"allowExit:{allowExit}");
+
+			File.WriteAllLines(skillzPlusUnityPath, allLines);
 		}
 
 		private static bool SetUpSDKFiles(string projPath)

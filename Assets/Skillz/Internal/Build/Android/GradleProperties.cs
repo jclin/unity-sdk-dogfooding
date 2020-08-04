@@ -80,5 +80,10 @@ namespace SkillzSDK.Internal.Build.Android
 			fileContents.Add(line);
 			modified |= true;
 		}
+
+		public void SetAt(int index, string value)
+		{
+			fileContents[index] = value;
+		}
 	}
 }

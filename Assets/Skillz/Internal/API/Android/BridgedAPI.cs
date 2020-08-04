@@ -74,8 +74,6 @@ namespace SkillzSDK.Internal.API.Android
 			}
 		}
 
-		private Match _matchInfo;
-
 		public void Initialize(int gameID, Environment environment, Orientation orientation)
 		{
 			if (Application.platform != RuntimePlatform.Android)
@@ -125,17 +123,12 @@ namespace SkillzSDK.Internal.API.Android
 
 		public Match GetMatchInfo()
 		{
-			if (_matchInfo == null)
+			using (var skillz = GetSkillz())
 			{
-				using (var skillz = GetSkillz())
-				{
-					var matchInfoJsonString = skillz.CallStatic<string>("getMatchInfoJsonString", GetCurrentActivity());
-					Dictionary<string, object> matchInfoDict = DeserializeJSONToDictionary(matchInfoJsonString);
-					_matchInfo = new Match(matchInfoDict);
-				}
+				var matchInfoJsonString = skillz.CallStatic<string>("getMatchInfoJsonString", GetCurrentActivity());
+				Dictionary<string, object> matchInfoDict = DeserializeJSONToDictionary(matchInfoJsonString);
+				return new Match(matchInfoDict);
 			}
-
-			return _matchInfo;
 		}
 
 		public void AbortMatch()
@@ -171,7 +164,6 @@ namespace SkillzSDK.Internal.API.Android
 			using (var skillz = GetSkillz())
 			{
 				skillz.CallStatic("reportScore", GetCurrentActivity(), bigDecScore);
-				_matchInfo = null;
 			}
 		}
 

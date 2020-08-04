@@ -13,6 +13,8 @@ namespace SkillzSDK.Settings
 
 		private const string MainTemplateGradle = "mainTemplate.gradle";
 
+		private const string ConsumerRules = "consumer-rules.pro";
+
 		private static readonly string AndroidPluginDirectory = Path.Combine(RootAssetsFolder, "Plugins", "Android");
 		private static readonly string BuildGradlePath = Path.Combine(AndroidPluginDirectory, "mainTemplate.gradle");
 
@@ -66,10 +68,10 @@ namespace SkillzSDK.Settings
 
 		private void CreateDefaultProGuard()
 		{
-			var proguardPath = Path.Combine(AndroidPluginDirectory, "proguard-user.txt");
+			var proguardPath = Path.Combine(AndroidPluginDirectory, "proguard-rules.pro");
 
 			Debug.Log(string.Format(LogFormat, $"Generating {proguardPath}"));
-			FileUtil.ReplaceFile(Path.Combine(SkillzPluginResourcesFolder, "proguard-user.txt"), proguardPath);
+			FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, "proguard-rules.pro"), proguardPath);
 		}
 
 		private void CreateMultidexKeep()
@@ -95,7 +97,7 @@ namespace SkillzSDK.Settings
 			{
 				get
 				{
-					return "Allow Skillz to overwrite mainTemplate.gradle, baseProjectTemplate.gradle, launcherTemplate.gradle, multidex-keep.txt, and proguard-user.txt?";
+					return "Allow Skillz to overwrite mainTemplate.gradle, baseProjectTemplate.gradle, launcherTemplate.gradle, multidex-keep.txt, proguard-rules.pro, and consumer-rules.pro?";
 				}
 			}
 
@@ -112,6 +114,7 @@ namespace SkillzSDK.Settings
 				FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, MainTemplateGradle), Path.Combine(AndroidPluginDirectory, MainTemplateGradle));
 				FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, BaseProjectTemplateGradle), Path.Combine(AndroidPluginDirectory, BaseProjectTemplateGradle));
 				FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, LauncherTemplateGradle), Path.Combine(AndroidPluginDirectory, LauncherTemplateGradle));
+				FileUtil.ReplaceFile(Path.Combine(SourceResourcesFolder, ConsumerRules), Path.Combine(AndroidPluginDirectory, ConsumerRules));
 			}
 		}
 #endif // UNITY_2019_OR_NEWER
@@ -126,7 +129,7 @@ namespace SkillzSDK.Settings
 			{
 				get
 				{
-					return "Allow Skillz to overwrite mainTemplate.gradle, multidex-keep.txt, and proguard-user.txt?";
+					return "Allow Skillz to overwrite mainTemplate.gradle, multidex-keep.txt, and proguard-rules.pro?";
 				}
 			}
 
