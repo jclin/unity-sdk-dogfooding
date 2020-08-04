@@ -6,6 +6,7 @@ using System;
 /// All of the optional methods will by default not do anything when called.
 /// These callbacks can be used to control game flow or aggresively clean up resources you no longer need.
 /// </summary>
+[Obsolete("The RTTB APIs are obsolete and will be removed in a future version of the Skillz SDK.")]
 public interface SkillzSyncDelegate : SkillzMatchDelegate
 {
     /// <summary>

@@ -7,4 +7,6 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
--keep class com.scottyab.rootbeer.** { *; }
+-keep class retrofit.** {*;}
+-keep class com.facebook.** {*;}
+-keep class com.amazonaws.** {*;}
