@@ -112,7 +112,43 @@ namespace SkillzSDK.Internal.Build.Android
 			Debug.Log(string.Format(Constants.LogFormat, $"{allLines[index]}"));
 			Debug.Log(string.Format(Constants.LogFormat, stringBuilder.ToString()));
 
+			// Skip if the dependency already has exclusion semantics.
+			if (allLines[index + 1].Trim() == "{" &&
+				allLines[index + 2].Trim() == $"exclude {excludeLabel}: '{item}'" &&
+				allLines[index + 3].Trim() == "}")
+			{
+				Debug.Log($"Dependency '{dependency}' already has exclusion semantics applied.");
+				return;
+			}
+
 			allLines.InsertRange(index + 1, stringBuilder.ToString().Split('\n'));
+
+			modified |= true;
+		}
+
+		public void RemoveMoatRepository()
+		{
+			var index = allLines.FindIndex(line => line.Contains("https://s3.amazonaws.com/moat-sdk-builds"));
+			if (index == -1)
+			{
+				Debug.Log("The project does not reference the moat repository");
+				return;
+			}
+
+			if (!allLines[index - 1].Trim().StartsWith("maven {"))
+			{
+				Debug.Log("The project does not reference the moat repository");
+				return;
+			}
+
+			if (!allLines[index + 1].Trim().StartsWith("}"))
+			{
+				Debug.Log("The project does not reference the moat repository");
+				return;
+			}
+
+			Debug.Log("Removing the moat repository");
+			allLines.RemoveRange(index - 1, 3);
 
 			modified |= true;
 		}
@@ -120,6 +156,32 @@ namespace SkillzSDK.Internal.Build.Android
 		public void ExcludeAARDependency(string fullName)
 		{
 			ExcludeFileDependency(fullName, AAR);
+		}
+
+		public void FixFirebaseLocalRepoPath()
+		{
+			Debug.Log("Checking if the gradle is referencing a local Firebase repo...");
+
+			const string wrongLocalRepo = "Assets/Firebase/m2repository";
+
+			var index = allLines.FindIndex(0, line => line.Contains(wrongLocalRepo));
+			if (index == -1)
+			{
+				Debug.Log("The project is not referencing a local Firebase repo.");
+				return;
+			}
+
+			// The default folder in the Play Resolver is `Assets/GeneratedLocalRepo`.
+			// Unfortunately, there doesn't seem to be a way to access this setting
+			// programmatically, so assume the dev has kept it at the default value.
+			const string defaultLocalRepo = "GeneratedLocalRepo";
+
+			var theLine = allLines[index];
+			allLines[index] = theLine.Replace(wrongLocalRepo, $"Assets/{defaultLocalRepo}/Firebase/m2repository");
+
+			Debug.Log($"Patched the local Firebase repo to '{allLines[index]}'");
+
+			modified |= true;
 		}
 
 		public void Dispose()

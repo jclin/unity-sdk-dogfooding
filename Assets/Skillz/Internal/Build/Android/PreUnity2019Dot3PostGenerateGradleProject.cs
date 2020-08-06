@@ -14,6 +14,14 @@ namespace SkillzSDK.Internal.Build.Android
 	/// </summary>
 	internal sealed class PreUnity2019Dot3PostGenerateGradleProject : PostGenerateGradleAndroidProject, IPostGenerateGradleAndroidProject
 	{
+		protected override string SourceResourcesFolder
+		{
+			get
+			{
+				return Path.Combine(Application.dataPath, "Skillz", "Resources", "2019.2");
+			}
+		}
+
 		public void OnPostGenerateGradleAndroidProject(string basePath)
 		{
 			ModifyGradleProject(basePath);
@@ -34,7 +42,7 @@ namespace SkillzSDK.Internal.Build.Android
 			manifest.SetClearTaskOnLaunch("false");
 			manifest.SetAlwaysRetainTaskState("true");
 
-			manifest.AddMetadataElement("skillz_allow_exit", "false");
+			manifest.AddMetadataElement("skillz_allow_exit", SkillzSettings.Instance.AllowSkillzExit.ToString().ToLowerInvariant());
 			manifest.AddMetadataElement("skillz_game_id", SkillzSettings.Instance.GameID.ToString());
 			manifest.AddMetadataElement("skillz_production", (SkillzSettings.Instance.Environment == Environment.Production).ToString().ToLowerInvariant());
 			manifest.AddMetadataElement("skillz_game_activity", SkillzActivityName);
@@ -47,6 +55,11 @@ namespace SkillzSDK.Internal.Build.Android
 			manifest.AddUsesLibrary("org.apache.http.legacy", false);
 
 			manifest.Save();
+		}
+
+		protected override string GetProguardRulesProPath(string basePath)
+		{
+			return Path.Combine(basePath, "proguard-rules.pro");
 		}
 
 		protected override string GetMultidexKeepPath(string basePath)
@@ -67,6 +80,10 @@ namespace SkillzSDK.Internal.Build.Android
 		protected override string GetFirebaseGradlePath(string basePath)
 		{
 			return Path.Combine(basePath, Firebase, BuildDotGradle);
+		}
+
+		protected override void PerformMiscWork(string basePath)
+		{
 		}
 	}
 }
