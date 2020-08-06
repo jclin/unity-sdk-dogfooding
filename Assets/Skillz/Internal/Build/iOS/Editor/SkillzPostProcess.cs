@@ -151,23 +151,35 @@ namespace SkillzSDK.Internal.Build.iOS
 				else
 				{
 					ActualUnityEditor.EditorUtility.DisplayDialog("Skillz auto-build failed!",
-					                            "Couldn't find the directory '" + AutoBuild_SkillzPath +
-					                            	"'; please locate it manually in the following dialog.",
-					                            "OK");
+												"Couldn't find the directory '" + AutoBuild_SkillzPath +
+													"'; please locate it manually in the following dialog.",
+												"OK");
 				}
 			}
-			while (askForPath && Path.GetFileName(sdkPath) != "Skillz.framework")
-			{
-				//If the user hit "cancel" on the dialog, quit out.
-				if (sdkPath == "")
-				{
-					UnityEngine.Debug.Log("You canceled the auto-copying of the 'Skillz.framework'. " +
-										  "You must copy it yourself into '" + projPath + "' before building the XCode project.");
-					return true;
-				}
 
-				sdkPath = ActualUnityEditor.EditorUtility.OpenFolderPanel("Select the Skillz.framework file",
-				                                        "", "");
+			var specialSdkPath = Path.Combine(Application.dataPath, "Plugins", "iOS", "Skillz.framework");
+			if (System.IO.Directory.Exists(specialSdkPath))
+			{
+				// The iOS SDK was found at the 'special' path, so skip
+				// prompting the user for its location.
+				Debug.Log($"Adding Skillz.framework found at '{specialSdkPath}'");
+				sdkPath = specialSdkPath;
+			}
+			else
+			{
+				while (askForPath && Path.GetFileName(sdkPath) != "Skillz.framework")
+				{
+					//If the user hit "cancel" on the dialog, quit out.
+					if (sdkPath == "")
+					{
+						UnityEngine.Debug.Log("You canceled the auto-copying of the 'Skillz.framework'. " +
+											"You must copy it yourself into '" + projPath + "' before building the XCode project.");
+						return true;
+					}
+
+					sdkPath = ActualUnityEditor.EditorUtility.OpenFolderPanel("Select the Skillz.framework file",
+															"", "");
+				}
 			}
 
 			//Copy the SDK files into the XCode project.
